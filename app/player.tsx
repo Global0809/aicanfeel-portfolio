@@ -82,7 +82,7 @@ export default function Player({ open, selected, muted, onMute, onClose, onNext 
   const full = async () => { try { if (document.fullscreenElement) await document.exitFullscreen(); else if (screenRef.current?.requestFullscreen) await screenRef.current.requestFullscreen(); else (videoRef.current as HTMLVideoElement & { webkitEnterFullscreen?: () => void })?.webkitEnterFullscreen?.(); } catch { videoRef.current?.setAttribute('controls', ''); } };
   const numeric = (value: number | readonly number[]) => Array.isArray(value) ? value[0] : value as number;
   return <Dialog open={open} onOpenChange={(value) => { if (!value) onClose(); }}>
-    <DialogContent className="cinema-dialog" showCloseButton={false}>
+    <DialogContent className="cinema-dialog" style={{ translate: 'none' }} showCloseButton={false}>
       <div className={`cinema ${visible || !playing ? 'controls-visible' : ''}`} ref={screenRef} onPointerMove={reveal} onTouchStart={reveal} onFocusCapture={reveal}>
         <div className="cinema-top"><span className="wordmark">AICANFEEL<span className="brand-dot" /></span><span className="cinema-count">{String(selected + 1).padStart(2, '0')} / 05</span><button className="round-control" onClick={onClose} aria-label="Close film"><X /></button></div>
         <div className="screen" onPointerDown={e => { swipe.current = { x: e.clientX, y: e.clientY }; }} onPointerUp={e => { if (swipe.current && e.clientY - swipe.current.y > 90 && Math.abs(e.clientX - swipe.current.x) < 65) onClose(); swipe.current = null; }}>
@@ -100,6 +100,3 @@ export default function Player({ open, selected, muted, onMute, onClose, onNext 
     </DialogContent>
   </Dialog>;
 }
-
-
-

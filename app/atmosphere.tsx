@@ -20,7 +20,7 @@ export default function Atmosphere(props: AtmosphereProps) {
     let selected = current.current.selected;
     let pointerX = -1000, pointerY = -1000, pointerTime = -10000;
     let pulseX = 0, pulseY = 0, pulseAge = 10;
-    let red = 190, green = 218, blue = 209;
+    let red = 201, green = 0, blue = 43;
     const random = (seed: number) => { const value = Math.sin(seed * 127.1 + 311.7) * 43758.5453; return value - Math.floor(value); };
     const particles = Array.from({ length: 130 }, (_, index) => ({ x: random(index + 1), y: random(index + 201), depth: random(index + 401), phase: random(index + 601) * Math.PI * 2, vx: 0, vy: 0 }));
     const schedule = () => { if (!frame) frame = requestAnimationFrame(draw); };
@@ -60,7 +60,7 @@ export default function Atmosphere(props: AtmosphereProps) {
       const centerX = width * (.5 + (calm ? 0 : Math.sin(elapsed * .19) * .08));
       const centerY = height * .44;
       const glow = context.createRadialGradient(centerX, centerY, 0, centerX, centerY, Math.min(width * .75, 570));
-      glow.addColorStop(0, `rgba(${tint}, ${.035 + breath * .025})`); glow.addColorStop(.5, `rgba(${tint}, .012)`); glow.addColorStop(1, `rgba(${tint}, 0)`);
+      glow.addColorStop(0, `rgba(${tint}, ${.045 + breath * .03})`); glow.addColorStop(.5, `rgba(${tint}, .018)`); glow.addColorStop(1, `rgba(${tint}, 0)`);
       context.fillStyle = glow; context.fillRect(0, 0, width, height);
       const proximity = calm ? 0 : Math.max(0, 1 - (time - pointerTime) / 1800);
       const count = Math.round((width < 761 ? 70 : 130) * (lite ? .5 : 1));

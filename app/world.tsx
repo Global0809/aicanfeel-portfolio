@@ -36,7 +36,7 @@ export default function World(props: WorldProps) {
       const keepMaterial = <M extends InstanceType<typeof T.Material>>(m: M) => { materials.push(m); return m; };
       const loader = new T.TextureLoader();
       const studio = new T.Scene();
-      studio.background = new T.Color(0x242724);
+      studio.background = new T.Color(0x4c101e);
       for (const [x, y, z, w, h] of [[-4, 3, 5, 2, 7], [4, 1, 2, 1, 8], [0, 6, 0, 8, 2]]) {
         const softbox = new T.Mesh(keepGeometry(new T.PlaneGeometry(w, h)), keepMaterial(new T.MeshBasicMaterial({ color: new T.Color(3, 3, 3), side: T.DoubleSide })));
         softbox.position.set(x, y, z); softbox.lookAt(0, 0, 0); studio.add(softbox);
@@ -48,8 +48,8 @@ export default function World(props: WorldProps) {
       let loaded = 0, needsRender = true;
       const cards = films.map((film, index) => {
         const group = new T.Group();
-        const glass = keepMaterial(new T.MeshPhysicalMaterial({ color: 0x111815, metalness: .8, roughness: .16, clearcoat: 1, clearcoatRoughness: .08 }));
-        const body = new T.Mesh(keepGeometry(new T.BoxGeometry(2.16, 3.84, .055)), glass);
+        const glass = keepMaterial(new T.MeshPhysicalMaterial({ color: 0xb70021, metalness: .32, roughness: .12, clearcoat: 1, clearcoatRoughness: .04, envMapIntensity: 1.3 }));
+        const body = new T.Mesh(keepGeometry(new T.BoxGeometry(2.19, 3.87, .09)), glass);
         group.add(body);
         const texture = loader.load(film.poster, () => {
           if (cancelled) { texture.dispose(); return; }
@@ -60,7 +60,7 @@ export default function World(props: WorldProps) {
         texture.anisotropy = Math.min(renderer.capabilities.getMaxAnisotropy(), 4);
         textures.push(texture);
         const face = new T.Mesh(keepGeometry(new T.PlaneGeometry(2.1, 3.78)), keepMaterial(new T.MeshBasicMaterial({ map: texture, toneMapped: false })));
-        face.position.z = .03;
+        face.position.z = .051;
         face.userData.film = index;
         group.add(face);
         const edge = new T.LineSegments(keepGeometry(new T.EdgesGeometry(body.geometry)), keepMaterial(new T.LineBasicMaterial({ color: film.accent, transparent: true, opacity: .34 })));
@@ -75,23 +75,23 @@ export default function World(props: WorldProps) {
       for (let i = 0; i <= segments; i++) {
         const a = i / segments * Math.PI * 2;
         for (const side of [-1, 1]) {
-          const r = 2.05 + side * .1 * Math.cos(a * 1.5);
-          ribbonPositions.push(Math.cos(a) * r, Math.sin(a) * r * .78, side * .16 * Math.sin(a * 1.5));
+          const r = 2.05 + side * .19 * Math.cos(a * 1.5);
+          ribbonPositions.push(Math.cos(a) * r, Math.sin(a) * r * .78, side * .23 * Math.sin(a * 1.5));
         }
         if (i < segments) { const n = i * 2; ribbonIndices.push(n, n + 1, n + 2, n + 1, n + 3, n + 2); }
       }
       const ribbonGeometry = keepGeometry(new T.BufferGeometry());
       ribbonGeometry.setAttribute('position', new T.Float32BufferAttribute(ribbonPositions, 3));
       ribbonGeometry.setIndex(ribbonIndices); ribbonGeometry.computeVertexNormals();
-      const ribbonMaterial = keepMaterial(new T.MeshPhysicalMaterial({ color: 0xbfc9c3, metalness: .92, roughness: .18, clearcoat: 1, side: T.DoubleSide, envMapIntensity: 1.15 }));
+      const ribbonMaterial = keepMaterial(new T.MeshPhysicalMaterial({ color: 0xc9002b, metalness: .4, roughness: .095, clearcoat: 1, clearcoatRoughness: .035, transparent: true, opacity: .88, side: T.DoubleSide, envMapIntensity: 1.35 }));
       const ribbon = new T.Mesh(ribbonGeometry, ribbonMaterial);
       ribbon.position.set(0, -.15, -.25); ribbon.rotation.set(.25, -.38, -.32);
       scene.add(ribbon);
-      const light = new T.DirectionalLight(0xe9fff6, 5); light.position.set(-3, 4, 5); scene.add(light);
-      const rimLight = new T.PointLight(0x9eadcd, 18, 20); rimLight.position.set(3, -2, 2); scene.add(rimLight);
+      const light = new T.DirectionalLight(0xfff5f7, 3.2); light.position.set(-3, 4, 5); scene.add(light);
+      const rimLight = new T.PointLight(0xff244d, 14, 20); rimLight.position.set(3, -2, 2); scene.add(rimLight);
       scene.add(new T.AmbientLight(0xffffff, 1));
       const network = new T.Group(); scene.add(network);
-      const lineMaterial = keepMaterial(new T.LineBasicMaterial({ color: 0x67867a, transparent: true, opacity: .16 }));
+      const lineMaterial = keepMaterial(new T.LineBasicMaterial({ color: 0xb70021, transparent: true, opacity: .16 }));
       for (let i = 0; i < 5; i++) {
         const a = i * Math.PI * 2 / 5;
         const points = [new T.Vector3(Math.sin(a) * 1.8, -1.2, Math.cos(a)), new T.Vector3(Math.sin(a) * 3.2, -2.4, Math.cos(a) * 1.8), new T.Vector3(Math.sin(a) * 5.2, -.4, Math.cos(a) * 2.2)];
@@ -99,7 +99,7 @@ export default function World(props: WorldProps) {
         network.add(new T.Line(keepGeometry(new T.BufferGeometry().setFromPoints(curve.getPoints(48))), lineMaterial));
       }
       const groundPoints = Array.from({ length: 161 }, (_, i) => { const a = i / 160 * Math.PI * 2; return new T.Vector3(Math.cos(a) * 5.35, -2.65, Math.sin(a) * 2.5); });
-      scene.add(new T.Line(keepGeometry(new T.BufferGeometry().setFromPoints(groundPoints)), keepMaterial(new T.LineBasicMaterial({ color: 0x789487, opacity: .15, transparent: true }))));
+      scene.add(new T.Line(keepGeometry(new T.BufferGeometry().setFromPoints(groundPoints)), keepMaterial(new T.LineBasicMaterial({ color: 0xb70021, opacity: .15, transparent: true }))));
       let width = 1, height = 1, rotation = current.current.selected * Math.PI * 2 / 5, target = rotation, selected = current.current.selected;
       let frame = 0, lastTime = 0, zoom = 0, reset = current.current.reset, elapsed = 0, velocity = 0;
       let previousCalm = current.current.calm;
@@ -169,7 +169,7 @@ export default function World(props: WorldProps) {
           group.lookAt(camera.position); group.rotateY(-Math.sin(a) * .16);
           if (!calm) group.rotateZ(Math.sin(clock * .5 + index) * .009);
           group.scale.setScalar(1 + (index === selected ? breath * .016 : 0));
-          const brightness = index === selected ? 1 : .45 + Math.max(0, Math.cos(a)) * .22;
+          const brightness = index === selected ? 1 : .65 + Math.max(0, Math.cos(a)) * .18;
           face.material.color.setScalar(T.MathUtils.lerp(face.material.color.r, brightness, calm ? 1 : .12));
           edge.material.opacity = index === selected ? .72 + breath * .18 : .2;
         });
