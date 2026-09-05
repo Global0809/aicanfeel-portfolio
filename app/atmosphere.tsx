@@ -20,10 +20,14 @@ export default function Atmosphere(props: AtmosphereProps) {
     let selected = current.current.selected;
     let pointerX = -1000, pointerY = -1000, pointerTime = -10000;
     let pulseX = 0, pulseY = 0, pulseAge = 10;
-    let red = 0, green = 221, blue = 255;
+    let red = 86, green = 123, blue = 169;
+    let glassX = 0, glassY = 0, glassReady = false;
+    const glass = new Image(); glass.decoding = 'async';
     const random = (seed: number) => { const value = Math.sin(seed * 127.1 + 311.7) * 43758.5453; return value - Math.floor(value); };
     const particles = Array.from({ length: 130 }, (_, index) => ({ x: random(index + 1), y: random(index + 201), depth: random(index + 401), phase: random(index + 601) * Math.PI * 2, vx: 0, vy: 0 }));
     const schedule = () => { if (!frame) frame = requestAnimationFrame(draw); };
+    glass.onload = () => { glassReady = true; canvas.dataset.glassReady = 'true'; schedule(); };
+    glass.src = '/dark-glass.png';
     const resize = () => {
       width = host.clientWidth; height = host.clientHeight;
       const density = Math.min(devicePixelRatio, 1.25);
@@ -60,10 +64,34 @@ export default function Atmosphere(props: AtmosphereProps) {
       const centerX = width * (.5 + (calm ? 0 : Math.sin(elapsed * .19) * .08));
       const centerY = height * .44;
       const glow = context.createRadialGradient(centerX, centerY, 0, centerX, centerY, Math.min(width * .75, 570));
-      glow.addColorStop(0, `rgba(${tint}, ${.045 + breath * .03})`); glow.addColorStop(.5, `rgba(${tint}, .018)`); glow.addColorStop(1, `rgba(${tint}, 0)`);
+      glow.addColorStop(0, `rgba(${tint}, ${.006 + breath * .006})`); glow.addColorStop(.5, `rgba(${tint}, .004)`); glow.addColorStop(1, `rgba(${tint}, 0)`);
       context.fillStyle = glow; context.fillRect(0, 0, width, height);
       const proximity = calm ? 0 : Math.max(0, 1 - (time - pointerTime) / 1800);
-      const count = Math.round((width < 761 ? 70 : 130) * (lite ? .5 : 1));
+      if (glassReady) {
+        // Gently deform sampled glass folds instead of spinning an object over the films.
+        const targetX = proximity ? (pointerX / width - .5) * 16 : 0;
+        const targetY = proximity ? (pointerY / height - .5) * 8 : 0;
+        glassX += ((calm ? 0 : targetX) - glassX) * .1;
+        glassY += ((calm ? 0 : targetY) - glassY) * .1;
+        const artWidth = Math.max(width * 1.15, 760), artHeight = artWidth * glass.naturalHeight / glass.naturalWidth;
+        const left = (width - artWidth) / 2 + glassX;
+        const top = height * (width < 761 ? .26 : .015) + glassY;
+        const strips = lite ? 24 : 48;
+        context.globalCompositeOperation = 'source-over'; context.globalAlpha = 1;
+        for (let strip = 0; strip < strips; strip++) {
+          const u = strip / strips, screenX = left + u * artWidth;
+          const local = Math.exp(-Math.abs(screenX - pointerX) / 180) * proximity;
+          const bend = calm ? 0 : Math.sin(elapsed * .35 + u * 5) * 2.5 + Math.sin(elapsed * 1.1 + u * 9) * local * 9;
+          context.drawImage(glass, u * glass.naturalWidth, 0, glass.naturalWidth / strips, glass.naturalHeight, screenX, top + bend, artWidth / strips + .5, artHeight);
+        }
+        const fade = context.createLinearGradient(0, top, 0, top + artHeight);
+        fade.addColorStop(0, 'rgba(0,0,0,0)'); fade.addColorStop(.2, 'rgba(0,0,0,.32)');
+        fade.addColorStop(.7, 'rgba(0,0,0,.32)'); fade.addColorStop(1, 'rgba(0,0,0,0)');
+        context.globalCompositeOperation = 'destination-in'; context.fillStyle = fade;
+        context.fillRect(0, 0, width, height);
+        context.globalCompositeOperation = 'source-over'; context.globalAlpha = 1;
+      }
+      const count = Math.round((width < 761 ? 46 : 80) * (lite ? .5 : 1));
       context.fillStyle = `rgb(${tint})`;
       for (let index = 0; index < count; index++) {
         const particle = particles[index];
@@ -82,7 +110,7 @@ export default function Atmosphere(props: AtmosphereProps) {
         }
         const edge = Math.min(1, x / 24, (width - x) / 24, y / 24, (height - y) / 24);
         const twinkle = calm ? .7 : .67 + Math.sin(elapsed * (1 + particle.depth) + particle.phase) * .33;
-        const alpha = (.15 + particle.depth * .43 + influence * .4) * twinkle * edge;
+        const alpha = (.09 + particle.depth * .27 + influence * .3) * twinkle * edge;
         const size = .55 + particle.depth * .85 + influence * .65;
         context.globalAlpha = Math.min(alpha, .9);
         context.beginPath(); context.arc(x, y, size, 0, Math.PI * 2); context.fill();
@@ -107,7 +135,7 @@ export default function Atmosphere(props: AtmosphereProps) {
     host.addEventListener('pointerleave', leave, { passive: true });
     document.addEventListener('visibilitychange', visibility);
     return () => {
-      wake.current = () => {}; cancelAnimationFrame(frame); observer.disconnect();
+      wake.current = () => {}; glass.onload = null; cancelAnimationFrame(frame); observer.disconnect();
       host.removeEventListener('pointermove', point); host.removeEventListener('pointerdown', pulse); host.removeEventListener('pointerleave', leave);
       document.removeEventListener('visibilitychange', visibility);
     };

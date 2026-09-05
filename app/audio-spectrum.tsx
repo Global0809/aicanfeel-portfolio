@@ -36,7 +36,7 @@ export default function AudioSpectrum({ videoRef, filmId }: Props) {
       const first = samples?.frames[index], second = samples?.frames[index + 1] ?? first;
       context.clearRect(0, 0, width, height);
       const gradient = context.createLinearGradient(0, 0, width, 0);
-      gradient.addColorStop(0, '#00ddff'); gradient.addColorStop(.52, '#fff685'); gradient.addColorStop(1, '#f75990');
+      gradient.addColorStop(0, '#34527c'); gradient.addColorStop(.52, '#9ab6d8'); gradient.addColorStop(1, '#34527c');
       context.fillStyle = gradient;
       let energy = 0;
       for (let band = 0; band < 32; band++) {

@@ -9,6 +9,7 @@ import { films, instagram, timecode } from './films';
 import World from './world';
 import Player from './player';
 import Atmosphere from './atmosphere';
+import { trackGlassLight } from './glass-light';
 export default function Portfolio() {
   const [selected, setSelected] = useState(0);
   const [player, setPlayer] = useState(false);
@@ -62,7 +63,7 @@ export default function Portfolio() {
     </section>
     <footer className="site-footer"><button className="quiet-button" onClick={() => setPanel('studio')}>The studio <ArrowDown size={14} /></button><a className="instagram-proof" href={instagram} target="_blank" rel="noopener noreferrer" aria-label="AICANFEEL on Instagram, verified, 260,000-plus followers"><BadgeCheck size={16} /><span>260K+ on Instagram</span><ArrowUpRight size={14} /></a></footer>
     <output className="sr-only" aria-live="polite">Selected film {selected + 1} of 5: {film.title}</output>
-    <Dialog open={panel !== null} onOpenChange={value => { if (!value) setPanel(null); }}><DialogContent className="info-dialog">
+    <Dialog open={panel !== null} onOpenChange={value => { if (!value) setPanel(null); }}><DialogContent className="info-dialog" onPointerMove={trackGlassLight}>
       {panel === 'films' && <><p className="eyebrow">THE COLLECTION / 05</p><DialogTitle>Five ways out of the ordinary.</DialogTitle><DialogDescription>Studio concepts and films. Choose a world to enter.</DialogDescription><div className="film-index">{films.map((item, index) => <button key={item.id} onClick={() => enter(index)} className="film-index-row"><span className="index-number">{String(index + 1).padStart(2, '0')}</span><Image unoptimized width={720} height={1280} src={item.poster} alt="" /><span className="index-copy"><strong>{item.title}</strong><span>{item.category}</span></span><span className="index-duration">{timecode(item.duration)}</span><Play size={16} /></button>)}</div></>}
       {panel === 'studio' && <><p className="eyebrow">INDEPENDENT VISION. IMPOSSIBLE WORLDS.</p><DialogTitle>Your music deserves<br />a world of its own.</DialogTitle><DialogDescription>We’re AICANFEEL. We create complete CGI and VFX music videos, from the first idea to the final frame.</DialogDescription><p className="studio-copy">Bring a song, a lyric, a rough idea. We’ll build the story around it — and turn it into a world that could only belong to you.</p><div className="studio-services"><span>Story & creative direction</span><span>CGI & visual effects</span><span>Performance & lip-sync</span><span>Full music-video production</span></div><a className="studio-cta" href={instagram} target="_blank" rel="noopener noreferrer"><span>Let’s talk about your song.<small>Start a project on Instagram</small></span><ArrowUpRight size={24} /></a><div className="studio-proof"><BadgeCheck size={17} /><span>@aicanfeel · Verified · 260K+ followers</span></div><p className="studio-note">The films shown here are studio concepts and promotional work. Project scope, rights, and delivery terms are agreed directly before production.</p><p className="studio-note">© {new Date().getFullYear()} AICANFEEL</p></>}
     </DialogContent></Dialog>

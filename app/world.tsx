@@ -36,7 +36,7 @@ export default function World(props: WorldProps) {
       const keepMaterial = <M extends InstanceType<typeof T.Material>>(m: M) => { materials.push(m); return m; };
       const loader = new T.TextureLoader();
       const studio = new T.Scene();
-      studio.background = new T.Color(0x0a2450);
+      studio.background = new T.Color(0x050b17);
       for (const [x, y, z, w, h] of [[-4, 3, 5, 2, 7], [4, 1, 2, 1, 8], [0, 6, 0, 8, 2]]) {
         const softbox = new T.Mesh(keepGeometry(new T.PlaneGeometry(w, h)), keepMaterial(new T.MeshBasicMaterial({ color: new T.Color(3, 3, 3), side: T.DoubleSide })));
         softbox.position.set(x, y, z); softbox.lookAt(0, 0, 0); studio.add(softbox);
@@ -46,23 +46,12 @@ export default function World(props: WorldProps) {
       scene.environment = environment.texture;
       pmrem.dispose();
       let loaded = 0, needsRender = true;
-      const roundedShape = (w: number, h: number, r: number) => {
-        const shape = new T.Shape(), x = -w / 2, y = -h / 2;
-        shape.moveTo(x + r, y); shape.lineTo(x + w - r, y); shape.quadraticCurveTo(x + w, y, x + w, y + r);
-        shape.lineTo(x + w, y + h - r); shape.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-        shape.lineTo(x + r, y + h); shape.quadraticCurveTo(x, y + h, x, y + h - r);
-        shape.lineTo(x, y + r); shape.quadraticCurveTo(x, y, x + r, y); return shape;
-      };
-      const frameShape = roundedShape(2.28, 3.96, .17);
-      const faceGeometry = keepGeometry(new T.ShapeGeometry(roundedShape(2.1, 3.78, .11), 10));
-      const positions = faceGeometry.getAttribute('position'), uv = faceGeometry.getAttribute('uv');
-      for (let vertex = 0; vertex < positions.count; vertex++) uv.setXY(vertex, (positions.getX(vertex) + 1.05) / 2.1, (positions.getY(vertex) + 1.89) / 3.78);
-      const frameGeometry = keepGeometry(new T.ExtrudeGeometry(frameShape, { depth: .08, bevelEnabled: true, bevelSegments: 3, steps: 1, bevelSize: .025, bevelThickness: .02, curveSegments: 10 }));
-      frameGeometry.translate(0, 0, -.06);
-      const edgeGeometry = keepGeometry(new T.BufferGeometry().setFromPoints(frameShape.getPoints(100).map(point => new T.Vector3(point.x, point.y, .046))));
+      const faceGeometry = keepGeometry(new T.PlaneGeometry(2.1, 3.78));
+      const frameGeometry = keepGeometry(new T.BoxGeometry(2.122, 3.802, .028));
+      const edgeGeometry = keepGeometry(new T.EdgesGeometry(frameGeometry));
       const cards = films.map((film, index) => {
         const group = new T.Group();
-        const glass = keepMaterial(new T.MeshPhysicalMaterial({ color: 0x9bedff, metalness: .18, roughness: .07, clearcoat: 1, clearcoatRoughness: .025, envMapIntensity: 1.65, transparent: true, opacity: .58 }));
+        const glass = keepMaterial(new T.MeshPhysicalMaterial({ color: 0x071120, metalness: .65, roughness: .18, clearcoat: 1, clearcoatRoughness: .09, envMapIntensity: .7 }));
         const body = new T.Mesh(frameGeometry, glass);
         group.add(body);
         const texture = loader.load(film.poster, () => {
@@ -74,38 +63,19 @@ export default function World(props: WorldProps) {
         texture.anisotropy = Math.min(renderer.capabilities.getMaxAnisotropy(), 4);
         textures.push(texture);
         const face = new T.Mesh(faceGeometry, keepMaterial(new T.MeshBasicMaterial({ map: texture, toneMapped: false })));
-        face.position.z = .051;
+        face.position.z = .016;
         face.userData.film = index;
         group.add(face);
-        const edge = new T.Line(edgeGeometry, keepMaterial(new T.LineBasicMaterial({ color: 0xe6fbff, transparent: true, opacity: .65 })));
+        const edge = new T.LineSegments(edgeGeometry, keepMaterial(new T.LineBasicMaterial({ color: 0x7793b0, transparent: true, opacity: .3 })));
         group.add(edge);
         world.add(group);
         return { group, face, edge };
       });
-      // A thin twisted optical ribbon. Its two edges exchange places in one revolution.
-      const ribbonPositions: number[] = [];
-      const ribbonIndices: number[] = [];
-      const segments = 320;
-      for (let i = 0; i <= segments; i++) {
-        const a = i / segments * Math.PI * 2;
-        for (const side of [-1, 1]) {
-          const r = 2.05 + side * .19 * Math.cos(a * 1.5);
-          ribbonPositions.push(Math.cos(a) * r, Math.sin(a) * r * .78, side * .23 * Math.sin(a * 1.5));
-        }
-        if (i < segments) { const n = i * 2; ribbonIndices.push(n, n + 1, n + 2, n + 1, n + 3, n + 2); }
-      }
-      const ribbonGeometry = keepGeometry(new T.BufferGeometry());
-      ribbonGeometry.setAttribute('position', new T.Float32BufferAttribute(ribbonPositions, 3));
-      ribbonGeometry.setIndex(ribbonIndices); ribbonGeometry.computeVertexNormals();
-      const ribbonMaterial = keepMaterial(new T.MeshPhysicalMaterial({ color: 0x00ddff, metalness: .28, roughness: .08, clearcoat: 1, clearcoatRoughness: .035, transparent: true, opacity: .72, side: T.DoubleSide, envMapIntensity: 1.35 }));
-      const ribbon = new T.Mesh(ribbonGeometry, ribbonMaterial);
-      ribbon.position.set(0, -.15, -.25); ribbon.rotation.set(.25, -.38, -.32);
-      scene.add(ribbon);
-      const light = new T.DirectionalLight(0xf4fbff, 2.8); light.position.set(-3, 4, 5); scene.add(light);
-      const rimLight = new T.PointLight(0xf75990, 12, 20); rimLight.position.set(3, -2, 2); scene.add(rimLight);
-      scene.add(new T.AmbientLight(0xffffff, 1));
+      const light = new T.DirectionalLight(0xa6bfdf, 1.2); light.position.set(-3, 4, 5); scene.add(light);
+      const rimLight = new T.PointLight(0x294b7c, 5, 20); rimLight.position.set(3, -2, 2); scene.add(rimLight);
+      scene.add(new T.AmbientLight(0x7e9fcb, .4));
       const network = new T.Group(); scene.add(network);
-      const lineMaterial = keepMaterial(new T.LineBasicMaterial({ color: 0x00ddff, transparent: true, opacity: .16 }));
+      const lineMaterial = keepMaterial(new T.LineBasicMaterial({ color: 0x38516c, transparent: true, opacity: .11 }));
       for (let i = 0; i < 5; i++) {
         const a = i * Math.PI * 2 / 5;
         const points = [new T.Vector3(Math.sin(a) * 1.8, -1.2, Math.cos(a)), new T.Vector3(Math.sin(a) * 3.2, -2.4, Math.cos(a) * 1.8), new T.Vector3(Math.sin(a) * 5.2, -.4, Math.cos(a) * 2.2)];
@@ -113,11 +83,11 @@ export default function World(props: WorldProps) {
         network.add(new T.Line(keepGeometry(new T.BufferGeometry().setFromPoints(curve.getPoints(48))), lineMaterial));
       }
       const groundPoints = Array.from({ length: 161 }, (_, i) => { const a = i / 160 * Math.PI * 2; return new T.Vector3(Math.cos(a) * 5.35, -2.65, Math.sin(a) * 2.5); });
-      scene.add(new T.Line(keepGeometry(new T.BufferGeometry().setFromPoints(groundPoints)), keepMaterial(new T.LineBasicMaterial({ color: 0x00ddff, opacity: .15, transparent: true }))));
+      scene.add(new T.Line(keepGeometry(new T.BufferGeometry().setFromPoints(groundPoints)), keepMaterial(new T.LineBasicMaterial({ color: 0x38516c, opacity: .1, transparent: true }))));
       let width = 1, height = 1, rotation = current.current.selected * Math.PI * 2 / 5, target = rotation, selected = current.current.selected;
       let frame = 0, lastTime = 0, zoom = 0, reset = current.current.reset, elapsed = 0, velocity = 0;
       let previousCalm = current.current.calm;
-      const accent = new T.Color(films[selected].accent);
+
       let pointerX = 0, pointerY = 0, pointerDownX = 0, pointerDownY = 0, dragOffset = 0, dragging = false, travelled = 0;
       const touches = new Map<number, { x: number; y: number }>();
       let pinchDistance = 0;
@@ -149,7 +119,7 @@ export default function World(props: WorldProps) {
         frame = requestAnimationFrame(draw);
         if (document.hidden || current.current.playing || time - lastTime < 32) return;
         const delta = Math.min((time - lastTime) / 1000, .05); lastTime = time;
-        if (current.current.selected !== selected) { let step = current.current.selected - selected; if (step > 2) step -= 5; if (step < -2) step += 5; target += step * Math.PI * 2 / 5; selected = current.current.selected; accent.set(films[selected].accent); needsRender = true; }
+        if (current.current.selected !== selected) { let step = current.current.selected - selected; if (step > 2) step -= 5; if (step < -2) step += 5; target += step * Math.PI * 2 / 5; selected = current.current.selected; needsRender = true; }
         if (reset !== current.current.reset) { zoom = 0; pointerX = 0; pointerY = 0; reset = current.current.reset; needsRender = true; }
         const calm = current.current.calm;
         if (calm !== previousCalm) { previousCalm = calm; needsRender = true; }
@@ -165,14 +135,8 @@ export default function World(props: WorldProps) {
         }
         const clock = calm ? 0 : elapsed;
         const breath = calm ? 0 : Math.sin(clock * .82);
-        ribbonMaterial.color.lerp(accent, calm ? 1 : 1 - Math.exp(-delta * 2.2));
-        ribbon.rotation.x = .25 + (calm ? 0 : Math.sin(clock * .36) * .24);
-        ribbon.rotation.y = -.38 + clock * .095;
-        ribbon.rotation.z = -.32 + (calm ? 0 : Math.sin(clock * .24) * .12 + pointerX * .12);
-        ribbon.scale.setScalar(1 + breath * .045);
-        ribbon.position.y = -.15 + breath * .07;
         network.rotation.y = -rotation;
-        lineMaterial.opacity = .14 + (calm ? 0 : (breath + 1) * .04);
+        lineMaterial.opacity = .08 + (calm ? 0 : (breath + 1) * .018);
         camera.position.x = T.MathUtils.lerp(camera.position.x, calm ? 0 : pointerX * .34 + Math.sin(clock * .31) * .055, calm ? 1 : .075);
         camera.position.y = T.MathUtils.lerp(camera.position.y, .35 + (calm ? 0 : pointerY * .18 + Math.sin(clock * .42) * .035), calm ? 1 : .075);
         camera.position.z = 10.0 + zoom + breath * .055;
@@ -183,9 +147,9 @@ export default function World(props: WorldProps) {
           group.lookAt(camera.position); group.rotateY(-Math.sin(a) * .16);
           if (!calm) group.rotateZ(Math.sin(clock * .5 + index) * .009);
           group.scale.setScalar(1 + (index === selected ? breath * .016 : 0));
-          const brightness = index === selected ? 1 : .65 + Math.max(0, Math.cos(a)) * .18;
+          const brightness = index === selected ? 1 : .5 + Math.max(0, Math.cos(a)) * .18;
           face.material.color.setScalar(T.MathUtils.lerp(face.material.color.r, brightness, calm ? 1 : .12));
-          edge.material.opacity = index === selected ? .8 + breath * .15 : .5;
+          edge.material.opacity = index === selected ? .48 + breath * .08 : .19;
         });
         renderer.render(scene, camera);
       };

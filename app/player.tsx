@@ -4,6 +4,7 @@ import { SkipForward, ArrowUpRight, Maximize, Minimize, Pause, Play, Volume2, Vo
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { Slider } from '@/components/ui/slider';
 import AudioSpectrum from './audio-spectrum';
+import { trackGlassLight } from './glass-light';
 import { Field as BaseField } from '@base-ui/react/field';
 import { films, instagram, timecode } from './films';
 
@@ -72,11 +73,11 @@ export default function Player({ open, selected, muted, onMute, onClose, onNext 
   const numeric = (value: number | readonly number[]) => Array.isArray(value) ? value[0] : value as number;
   return <Dialog open={open} onOpenChange={(value) => { if (!value) onClose(); }}>
     <DialogContent className="cinema-dialog" style={{ translate: 'none' }} showCloseButton={false}>
-      <div className="cinema" ref={screenRef}>
+      <div className="cinema" ref={screenRef} onPointerMove={trackGlassLight}>
         <div className="cinema-top"><span className="wordmark">AICANFEEL<span className="brand-dot" /></span><button className="round-control" onClick={onClose} aria-label="Close film"><X /></button></div>
         <div className="cinema-stage">
           <div className="phone-frame">
-            <span className="phone-key phone-key-one" aria-hidden="true" /><span className="phone-key phone-key-two" aria-hidden="true" />
+
             <div className="screen" onPointerDown={e => { swipe.current = { x: e.clientX, y: e.clientY }; }} onPointerUp={e => { if (swipe.current && e.clientY - swipe.current.y > 90 && Math.abs(e.clientX - swipe.current.x) < 65) onClose(); swipe.current = null; }}>
               {/* Original films retain their embedded subtitles; no separate transcript was supplied. */}
               {/* oxlint-disable-next-line jsx-a11y/media-has-caption */}

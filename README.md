@@ -1,6 +1,6 @@
 # AICANFEEL
 
-A mobile-first CGI/VFX portfolio in cobalt, pink, cyan, and lemon, with a guided glass film orbit and a portrait glass-phone player. The primary project contact is Instagram: https://www.instagram.com/aicanfeel/.
+A mobile-first CGI/VFX portfolio in near-black navy, with thin film frames, reactive smoked-blue glass folds, and a minimal portrait cinema. The primary project contact is Instagram: https://www.instagram.com/aicanfeel/.
 
 ## Development
 
@@ -24,7 +24,7 @@ Posters were matched against representative frames. The supplied vortex, romance
 - Video media loads only when a film opens. A compact spectrum file follows the current film; no microphone permission or Web Audio routing is used.
 - Use arrow keys to browse, Enter to enter, Escape to leave, and the controls to seek, adjust volume, or enter fullscreen.
 - Motion follows the device reduced-motion setting automatically; data saving and unsupported graphics use the simpler gallery. There is no Help panel or manual viewing-settings feature.
-- Ambient particles use one input-transparent canvas, capped at 70 particles on phones and 130 on desktop. Floating frames, breathing light, and particle drift pause during films or dialogs; calm mode stops continuous decorative animation.
+- Ambient particles use one input-transparent canvas, capped at 46 particles on phones and 80 on desktop. Floating frames, breathing light, and particle drift pause during films or dialogs; calm mode stops continuous decorative animation.
 - Original burned-in subtitles and booking overlays remain part of the supplied films; separate caption transcripts were not supplied.
 
 ## Hosting
@@ -44,3 +44,5 @@ The generated component catalog is kept unchanged and excluded from authored-sou
 The 32-band spectrum is measured from each delivered film at 20 frames per second, then interpolated against the video clock. It follows seeking, settles when paused or muted, and respects reduced motion. Original soundtrack playback is unchanged, including native HLS browsers.
 
 To regenerate after changing a film, run scripts/generate_spectra.py with Python and NumPy, plus FFmpeg and ffprobe on PATH (or supply --ffmpeg and --ffprobe paths).
+
+The ambient glass uses one sampled material image, with gentle pointer-driven deformation in the existing canvas. The former central ribbon is removed. Playback and dialogs pause gallery animation; reduced motion renders static glass. The cinema and information panels use the same smoked-blue material with restrained pointer lighting.
