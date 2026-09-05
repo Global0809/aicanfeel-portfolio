@@ -112,3 +112,50 @@ button:focus-visible, a:focus-visible { outline: 2px solid #bde1da; outline-offs
 .mobile-hint { display: none; }
 @media (max-width: 760px) { .mobile-hint { display: block; position: absolute; top: 122px; font-size: 12px; color: #9aa394; pointer-events: none; } }
 @media (min-width: 761px) { .world-frame { top: 106px; bottom: 204px; } .film-portal { height: min(30.2vw, 435px, 75%); width: auto; } }
+
+/* Motion lives behind the work; the controls and reading positions stay steady. */
+.portfolio { position: relative; isolation: isolate; }
+.atmosphere { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+.masthead, .intro, .collection-caption, .watch-row, .world-tools, .site-footer { animation: surface-arrive .85s cubic-bezier(.2,.75,.25,1) both; }
+.intro { animation-delay: .12s; }
+.collection-caption { animation-delay: .25s; }
+.watch-row { animation-delay: .42s; }
+.world-tools, .site-footer { animation-delay: .52s; }
+.film-caption > * { animation: caption-arrive .6s cubic-bezier(.2,.75,.25,1) both; }
+.film-caption > :nth-child(2) { animation-delay: .065s; }
+.film-caption > :nth-child(3) { animation-delay: .12s; }
+.intro h1 span { animation: title-breathe 7.7s ease-in-out infinite; }
+.brand-dot, .live-dot { animation: signal-breathe 4.8s ease-in-out infinite; }
+.live-dot { animation-delay: 1.2s; }
+.watch-button { position: relative; }
+.watch-button::before { content: ''; position: absolute; inset: -7px; border: 1px solid #c8e4dc; border-radius: inherit; pointer-events: none; animation: invitation-breathe 4.8s ease-in-out infinite; }
+.watch-button::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: linear-gradient(110deg, transparent 35%, #fff9 49%, transparent 63%) 180% 0 / 250% 100% no-repeat; animation: button-light 8.5s ease-in-out infinite; }
+.header-contact svg, .instagram-proof > svg:last-child, .studio-cta > svg { transition: transform .35s cubic-bezier(.2,.75,.25,1); }
+.header-contact:hover svg, .instagram-proof:hover > svg:last-child, .studio-cta:hover > svg { transform: translate(3px,-3px); }
+.header-contact { position: relative; }
+.header-contact::after { content: ''; position: absolute; height: 1px; bottom: 6px; left: 12px; right: 0; background: #b9dace; transform: scaleX(0); transform-origin: left; transition: transform .35s ease; }
+.header-contact:hover::after { transform: scaleX(1); }
+.round-control { transition: background .25s, border-color .25s, transform .25s; }
+.round-control:hover { border-color: #c4e0d470; transform: scale(1.07); }
+.round-control:active, .watch-button:active { transform: scale(.96); }
+.film-index-row { transition: background .2s, padding .3s; }
+.film-index-row:hover { padding-left: 9px; padding-right: 9px; }
+.film-portal { animation: portal-float 7.7s ease-in-out infinite; animation-delay: calc(var(--offset) * -.9s); }
+.film-portal.is-current { animation-name: portal-breathe; }
+.info-dialog { animation: panel-arrive .35s cubic-bezier(.2,.75,.25,1); }
+@keyframes surface-arrive { from { opacity: 0; translate: 0 10px; } to { opacity: 1; translate: 0 0; } }
+@keyframes caption-arrive { from { opacity: 0; translate: 0 9px; } to { opacity: 1; translate: 0 0; } }
+@keyframes title-breathe { 0%,100% { color: #818881; } 50% { color: #b6c5bd; } }
+@keyframes signal-breathe { 0%,100% { opacity: .5; scale: .8; } 50% { opacity: 1; scale: 1.2; } }
+@keyframes invitation-breathe { 0%,100% { opacity: .05; scale: .97; } 50% { opacity: .29; scale: 1.035; } }
+@keyframes button-light { 0%,60%,100% { background-position: -180% 0; opacity: 0; } 68% { opacity: .85; } 84% { background-position: 180% 0; opacity: 0; } }
+@keyframes portal-float { 0%,100% { translate: 0 4px; } 50% { translate: 0 -4px; } }
+@keyframes portal-breathe { 0%,100% { translate: 0 5px; scale: .995; } 50% { translate: 0 -5px; scale: 1.012; } }
+@keyframes panel-arrive { from { opacity: 0; scale: .975; } to { opacity: 1; scale: 1; } }
+.portfolio[data-paused=true] *, .portfolio[data-paused=true] *::before, .portfolio[data-paused=true] *::after { animation-play-state: paused; }
+.portfolio[data-calm=true] *, .portfolio[data-calm=true] *::before, .portfolio[data-calm=true] *::after { animation: none !important; }
+.portfolio[data-calm=true] .watch-button::before, .portfolio[data-calm=true] .watch-button::after { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; }
+  .watch-button::before, .watch-button::after { display: none; }
+}

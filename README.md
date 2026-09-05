@@ -24,6 +24,7 @@ Posters were matched against representative frames. The supplied vortex, romance
 - Only the following film is prefetched, after eight seconds of viewing, unless data saving is enabled.
 - Use arrow keys to browse, Enter to enter, Escape to leave, and the controls to seek, adjust volume, or enter fullscreen.
 - Open Help for calmer movement and simple viewing mode. `?view=cinema` provides a direct fallback QA entry.
+- Ambient particles use one input-transparent canvas, capped at 70 particles on phones and 130 on desktop. Floating frames, breathing light, and particle drift pause during films or dialogs; calm mode stops continuous decorative animation.
 - Original burned-in subtitles and booking overlays remain part of the supplied films; separate caption transcripts were not supplied.
 
 ## Hosting

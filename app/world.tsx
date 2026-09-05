@@ -45,7 +45,7 @@ export default function World(props: WorldProps) {
       const environment = pmrem.fromScene(studio, .02);
       scene.environment = environment.texture;
       pmrem.dispose();
-      let loaded = 0;
+      let loaded = 0, needsRender = true;
       const cards = films.map((film, index) => {
         const group = new T.Group();
         const glass = keepMaterial(new T.MeshPhysicalMaterial({ color: 0x111815, metalness: .8, roughness: .16, clearcoat: 1, clearcoatRoughness: .08 }));
@@ -53,7 +53,7 @@ export default function World(props: WorldProps) {
         group.add(body);
         const texture = loader.load(film.poster, () => {
           if (cancelled) { texture.dispose(); return; }
-          loaded++;
+          loaded++; needsRender = true;
           if (loaded === films.length) current.current.onReady(true);
         }, undefined, () => current.current.onReady(false));
         texture.colorSpace = T.SRGBColorSpace;
@@ -100,16 +100,14 @@ export default function World(props: WorldProps) {
       }
       const groundPoints = Array.from({ length: 161 }, (_, i) => { const a = i / 160 * Math.PI * 2; return new T.Vector3(Math.cos(a) * 5.35, -2.65, Math.sin(a) * 2.5); });
       scene.add(new T.Line(keepGeometry(new T.BufferGeometry().setFromPoints(groundPoints)), keepMaterial(new T.LineBasicMaterial({ color: 0x789487, opacity: .15, transparent: true }))));
-      const dust = new Float32Array(38 * 3);
-      for (let i = 0; i < 38; i++) { const k = i + 1; dust[i * 3] = Math.sin(k * 17.7) * 9; dust[i * 3 + 1] = Math.cos(k * 12.3) * 3; dust[i * 3 + 2] = -Math.abs(Math.sin(k * 5.1)) * 4; }
-      const pointsGeometry = keepGeometry(new T.BufferGeometry()); pointsGeometry.setAttribute('position', new T.BufferAttribute(dust, 3));
-      scene.add(new T.Points(pointsGeometry, keepMaterial(new T.PointsMaterial({ color: 0xbad3c8, size: .019, transparent: true, opacity: .35 }))));
       let width = 1, height = 1, rotation = current.current.selected * Math.PI * 2 / 5, target = rotation, selected = current.current.selected;
-      let frame = 0, lastTime = 0, zoom = 0, reset = current.current.reset;
+      let frame = 0, lastTime = 0, zoom = 0, reset = current.current.reset, elapsed = 0, velocity = 0;
+      let previousCalm = current.current.calm;
+      const accent = new T.Color(films[selected].accent);
       let pointerX = 0, pointerY = 0, pointerDownX = 0, pointerDownY = 0, dragOffset = 0, dragging = false, travelled = 0;
       const touches = new Map<number, { x: number; y: number }>();
       let pinchDistance = 0;
-      const resize = () => { width = host.clientWidth; height = host.clientHeight; renderer.setSize(width, height); camera.aspect = width / Math.max(height, 1); camera.updateProjectionMatrix(); };
+      const resize = () => { width = host.clientWidth; height = host.clientHeight; renderer.setSize(width, height); camera.aspect = width / Math.max(height, 1); camera.updateProjectionMatrix(); needsRender = true; };
       const observer = new ResizeObserver(resize); observer.observe(host); resize();
       const raycaster = new T.Raycaster();
       const hit = (e: PointerEvent) => { const box = canvas.getBoundingClientRect(); raycaster.setFromCamera(new T.Vector2((e.clientX - box.left) / width * 2 - 1, -(e.clientY - box.top) / height * 2 + 1), camera); return raycaster.intersectObjects(cards.map(c => c.face))[0]?.object.userData.film as number | undefined; };
@@ -118,7 +116,7 @@ export default function World(props: WorldProps) {
         const box = canvas.getBoundingClientRect(); pointerX = (e.clientX - box.left) / width - .5; pointerY = (e.clientY - box.top) / height - .5;
         if (!dragging) { canvas.style.cursor = hit(e) === undefined ? 'grab' : 'pointer'; return; }
         touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
-        if (touches.size === 2) { const p = [...touches.values()]; const distance = Math.hypot(p[1].x - p[0].x, p[1].y - p[0].y); zoom = Math.max(-1, Math.min(1.3, zoom + (pinchDistance - distance) * .01)); pinchDistance = distance; travelled = 100; return; }
+        if (touches.size === 2) { const p = [...touches.values()]; const distance = Math.hypot(p[1].x - p[0].x, p[1].y - p[0].y); zoom = Math.max(-1, Math.min(1.3, zoom + (pinchDistance - distance) * .01)); needsRender = true; pinchDistance = distance; travelled = 100; return; }
         travelled = Math.max(travelled, Math.hypot(e.clientX - pointerDownX, e.clientY - pointerDownY));
         dragOffset = -(e.clientX - pointerDownX) / width * 2.6;
       };
@@ -136,28 +134,44 @@ export default function World(props: WorldProps) {
         if (cancelled) return;
         frame = requestAnimationFrame(draw);
         if (document.hidden || current.current.playing || time - lastTime < 32) return;
-        lastTime = time;
-        if (current.current.selected !== selected) { let delta = current.current.selected - selected; if (delta > 2) delta -= 5; if (delta < -2) delta += 5; target += delta * Math.PI * 2 / 5; selected = current.current.selected; }
-        if (reset !== current.current.reset) { zoom = 0; pointerX = 0; pointerY = 0; reset = current.current.reset; }
+        const delta = Math.min((time - lastTime) / 1000, .05); lastTime = time;
+        if (current.current.selected !== selected) { let step = current.current.selected - selected; if (step > 2) step -= 5; if (step < -2) step += 5; target += step * Math.PI * 2 / 5; selected = current.current.selected; accent.set(films[selected].accent); needsRender = true; }
+        if (reset !== current.current.reset) { zoom = 0; pointerX = 0; pointerY = 0; reset = current.current.reset; needsRender = true; }
         const calm = current.current.calm;
-        rotation = calm ? target : T.MathUtils.lerp(rotation, target + dragOffset, .105);
-        const clock = calm ? 0 : time * .00013;
-        const accent = new T.Color(films[selected].accent);
-        ribbonMaterial.color.lerp(accent, .04);
-        ribbon.rotation.y = -.38 + Math.sin(clock) * .14;
-        ribbon.rotation.z = -.32 + (calm ? 0 : pointerX * .09);
-        ribbon.scale.setScalar(1 + Math.sin(clock * 1.3) * .014);
+        if (calm !== previousCalm) { previousCalm = calm; needsRender = true; }
+        if (calm && !needsRender) return;
+        needsRender = false;
+        if (calm) { rotation = target; velocity = 0; }
+        else {
+          elapsed += delta;
+          const destination = target + dragOffset + (dragging ? 0 : Math.sin(elapsed * .28) * .022);
+          velocity += (destination - rotation) * 48 * delta;
+          velocity *= Math.exp(-9.5 * delta);
+          rotation += velocity * delta;
+        }
+        const clock = calm ? 0 : elapsed;
+        const breath = calm ? 0 : Math.sin(clock * .82);
+        ribbonMaterial.color.lerp(accent, calm ? 1 : 1 - Math.exp(-delta * 2.2));
+        ribbon.rotation.x = .25 + (calm ? 0 : Math.sin(clock * .36) * .24);
+        ribbon.rotation.y = -.38 + clock * .095;
+        ribbon.rotation.z = -.32 + (calm ? 0 : Math.sin(clock * .24) * .12 + pointerX * .12);
+        ribbon.scale.setScalar(1 + breath * .045);
+        ribbon.position.y = -.15 + breath * .07;
         network.rotation.y = -rotation;
-        camera.position.x = T.MathUtils.lerp(camera.position.x, calm ? 0 : pointerX * .22, .06);
-        camera.position.y = T.MathUtils.lerp(camera.position.y, .35 + (calm ? 0 : pointerY * .12), .06);
-        camera.position.z = 10.0 + zoom;
+        lineMaterial.opacity = .14 + (calm ? 0 : (breath + 1) * .04);
+        camera.position.x = T.MathUtils.lerp(camera.position.x, calm ? 0 : pointerX * .34 + Math.sin(clock * .31) * .055, calm ? 1 : .075);
+        camera.position.y = T.MathUtils.lerp(camera.position.y, .35 + (calm ? 0 : pointerY * .18 + Math.sin(clock * .42) * .035), calm ? 1 : .075);
+        camera.position.z = 10.0 + zoom + breath * .055;
         camera.lookAt(0, -.05, 0);
         cards.forEach(({ group, face, edge }, index) => {
           const a = index * Math.PI * 2 / 5 - rotation;
-          group.position.set(Math.sin(a) * 4.9, .1 + Math.sin(clock + index) * (calm ? 0 : .025), Math.cos(a) * 2.25);
+          group.position.set(Math.sin(a) * 4.9, .1 + Math.sin(clock * .82 + index * 1.3) * (calm ? 0 : .105), Math.cos(a) * 2.25);
           group.lookAt(camera.position); group.rotateY(-Math.sin(a) * .16);
-          face.material.color.setScalar(index === selected ? 1 : .45 + Math.max(0, Math.cos(a)) * .22);
-          edge.material.opacity = index === selected ? .72 : .2;
+          if (!calm) group.rotateZ(Math.sin(clock * .5 + index) * .009);
+          group.scale.setScalar(1 + (index === selected ? breath * .016 : 0));
+          const brightness = index === selected ? 1 : .45 + Math.max(0, Math.cos(a)) * .22;
+          face.material.color.setScalar(T.MathUtils.lerp(face.material.color.r, brightness, calm ? 1 : .12));
+          edge.material.opacity = index === selected ? .72 + breath * .18 : .2;
         });
         renderer.render(scene, camera);
       };
