@@ -1,0 +1,39 @@
+import type { Metadata } from 'next';
+import { Geist, Geist_Mono } from 'next/font/google';
+import './globals.css';
+
+const geistSans = Geist({
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
+});
+
+const geistMono = Geist_Mono({
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
+});
+
+export const metadata: Metadata = {
+  metadataBase: new URL('https://aicanfeel-film-world.globalgupta14.chatgpt.site'),
+  title: 'AICANFEEL — Your song. Another world.',
+  description: 'CGI and VFX music videos for independent artists. Enter five impossible worlds, then create yours with AICANFEEL.',
+  openGraph: { title: 'AICANFEEL — Your song. Another world.', description: 'CGI / VFX / MUSIC VIDEOS', type: 'website', images: [{ url: '/og.png', width: 1729, height: 910 }] },
+  twitter: { card: 'summary_large_image', title: 'AICANFEEL — Your song. Another world.', images: ['/og.png'] },
+  icons: { icon: '/icon.svg' },
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en" className="dark">
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        {children}
+      </body>
+    </html>
+  );
+}
+
