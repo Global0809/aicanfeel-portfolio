@@ -20,7 +20,7 @@ export default function Atmosphere(props: AtmosphereProps) {
     let selected = current.current.selected;
     let pointerX = -1000, pointerY = -1000, pointerTime = -10000;
     let pulseX = 0, pulseY = 0, pulseAge = 10;
-    let red = 201, green = 0, blue = 43;
+    let red = 0, green = 221, blue = 255;
     const random = (seed: number) => { const value = Math.sin(seed * 127.1 + 311.7) * 43758.5453; return value - Math.floor(value); };
     const particles = Array.from({ length: 130 }, (_, index) => ({ x: random(index + 1), y: random(index + 201), depth: random(index + 401), phase: random(index + 601) * Math.PI * 2, vx: 0, vy: 0 }));
     const schedule = () => { if (!frame) frame = requestAnimationFrame(draw); };

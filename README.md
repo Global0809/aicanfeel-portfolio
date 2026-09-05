@@ -1,6 +1,6 @@
 # AICANFEEL
 
-A mobile-first white-and-red CGI/VFX portfolio with liquid-glass materials, a guided 3D film orbit, and an accessible cinematic player. The primary project contact is Instagram: https://www.instagram.com/aicanfeel/.
+A mobile-first CGI/VFX portfolio in cobalt, pink, cyan, and lemon, with a guided glass film orbit and a portrait glass-phone player. The primary project contact is Instagram: https://www.instagram.com/aicanfeel/.
 
 ## Development
 
@@ -20,8 +20,8 @@ Posters were matched against representative frames. The supplied vortex, romance
 
 - No film is requested on the initial portfolio screen. Metadata comes from the validated local media manifest.
 - Deliberate selection starts playback with sound enabled. A visible play action handles browser playback restrictions.
-- Automatic continuation can be disabled; sound settings persist across the sequence.
-- Only the following film is prefetched, after eight seconds of viewing, unless data saving is enabled.
+- Films stop at the end; the next-film icon opens the next work. Sound settings persist while the player is open.
+- Video media loads only when a film opens. A compact spectrum file follows the current film; no microphone permission or Web Audio routing is used.
 - Use arrow keys to browse, Enter to enter, Escape to leave, and the controls to seek, adjust volume, or enter fullscreen.
 - Motion follows the device reduced-motion setting automatically; data saving and unsupported graphics use the simpler gallery. There is no Help panel or manual viewing-settings feature.
 - Ambient particles use one input-transparent canvas, capped at 70 particles on phones and 130 on desktop. Floating frames, breathing light, and particle drift pause during films or dialogs; calm mode stops continuous decorative animation.
@@ -38,3 +38,9 @@ The source contains no credentials. Original local asset paths, temporary audits
 Checks cover desktop and phone-width layouts, real browser playback, original audio-stream preservation, automatic film continuation, mute state, closing and returning, keyboard controls, simple mode, production compilation, and type-aware linting. Device-specific fullscreen and physical multi-touch gestures should also be checked on an actual iPhone and Android phone before a major campaign.
 
 The generated component catalog is kept unchanged and excluded from authored-source linting. Authored application code retains the strict lint rules.
+
+## Audio visualizer
+
+The 32-band spectrum is measured from each delivered film at 20 frames per second, then interpolated against the video clock. It follows seeking, settles when paused or muted, and respects reduced motion. Original soundtrack playback is unchanged, including native HLS browsers.
+
+To regenerate after changing a film, run scripts/generate_spectra.py with Python and NumPy, plus FFmpeg and ffprobe on PATH (or supply --ffmpeg and --ffprobe paths).

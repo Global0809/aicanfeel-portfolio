@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://global0809.github.io'),
-  title: 'AICANFEEL — Your song. Another world.',
+  title: 'AICANFEEL — CGI & VFX Portfolio',
   description: 'CGI and VFX music videos for independent artists. Enter five impossible worlds, then create yours with AICANFEEL.',
   openGraph: { title: 'AICANFEEL — Your song. Another world.', description: 'CGI / VFX / MUSIC VIDEOS', type: 'website', images: [{ url: '/og.png', width: 1729, height: 910 }] },
   twitter: { card: 'summary_large_image', title: 'AICANFEEL — Your song. Another world.', images: ['/og.png'] },
@@ -36,4 +36,3 @@ export default function RootLayout({
     </html>
   );
 }
-
