@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://aicanfeel-film-world.globalgupta14.chatgpt.site'),
+  metadataBase: new URL('https://global0809.github.io'),
   title: 'AICANFEEL — Your song. Another world.',
   description: 'CGI and VFX music videos for independent artists. Enter five impossible worlds, then create yours with AICANFEEL.',
   openGraph: { title: 'AICANFEEL — Your song. Another world.', description: 'CGI / VFX / MUSIC VIDEOS', type: 'website', images: [{ url: '/og.png', width: 1729, height: 910 }] },
