@@ -1,6 +1,6 @@
 # AICANFEEL
 
-A mobile-first CGI/VFX portfolio in near-black navy, with thin film frames, reactive smoked-blue glass folds, and a minimal portrait cinema. The primary project contact is Instagram: https://www.instagram.com/aicanfeel/.
+A mobile-first CGI/VFX portfolio in near-black navy, with thin film frames inside a real-time spatial gallery and a minimal portrait cinema. The primary project contact is Instagram: https://www.instagram.com/aicanfeel/.
 
 ## Development
 
@@ -24,7 +24,7 @@ Posters were matched against representative frames. The supplied vortex, romance
 - Video media loads only when a film opens. A compact spectrum file follows the current film; no microphone permission or Web Audio routing is used.
 - Use arrow keys to browse, Enter to enter, Escape to leave, and the controls to seek, adjust volume, or enter fullscreen.
 - Motion follows the device reduced-motion setting automatically; data saving and unsupported graphics use the simpler gallery. There is no Help panel or manual viewing-settings feature.
-- Ambient particles use one input-transparent canvas, capped at 46 particles on phones and 80 on desktop. Floating frames, breathing light, and particle drift pause during films or dialogs; calm mode stops continuous decorative animation.
+- One WebGL renderer draws both the architectural environment and the film gallery. It uses 150 depth particles on phones and 280 on desktop, capped pixel density, and 25/30fps rendering. Camera movement, surface light, and drifting particles pause during films or dialogs; calm mode renders a still scene.
 - Original burned-in subtitles and booking overlays remain part of the supplied films; separate caption transcripts were not supplied.
 
 ## Hosting
@@ -45,4 +45,4 @@ The 32-band spectrum is measured from each delivered film at 20 frames per secon
 
 To regenerate after changing a film, run scripts/generate_spectra.py with Python and NumPy, plus FFmpeg and ffprobe on PATH (or supply --ffmpeg and --ffprobe paths).
 
-The ambient glass uses one sampled material image, with gentle pointer-driven deformation in the existing canvas. The former central ribbon is removed. Playback and dialogs pause gallery animation; reduced motion renders static glass. The cinema and information panels use the same smoked-blue material with restrained pointer lighting.
+The background is built from actual curved surface geometry, a softly lit procedural floor, and particles distributed in depth. The camera and light respond to pointer movement and gallery navigation. The full-page environment and the carousel share one renderer but have separate viewports, preserving poster proportions and accurate hit testing. No background image or central ornament is used. The cinema and information panels retain restrained pointer lighting.

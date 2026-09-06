@@ -8,7 +8,6 @@ import Link from 'next/link';
 import { films, instagram, timecode } from './films';
 import World from './world';
 import Player from './player';
-import Atmosphere from './atmosphere';
 import { trackGlassLight } from './glass-light';
 export default function Portfolio() {
   const [selected, setSelected] = useState(0);
@@ -48,14 +47,13 @@ export default function Portfolio() {
     window.addEventListener('keydown', key); return () => window.removeEventListener('keydown', key);
   });
   return <main className="portfolio" data-calm={calm} data-paused={player || panel !== null}>
-    {mounted && <Atmosphere accent={film.accent} selected={selected} calm={calm} lite={lite} active={!player && panel === null} />}
+    {mounted && !lite && <World selected={selected} calm={calm} playing={player || panel !== null} reset={reset} onSelect={select} onPlay={() => enter()} onReady={setReady} onInteract={() => setInteracted(true)} />}
     <header className="masthead"><Link className="wordmark" href="/" aria-label="AICANFEEL home">AICANFEEL<span className="brand-dot" /></Link><a className="header-contact" href={instagram} target="_blank" rel="noopener noreferrer" aria-label="Start a project on Instagram">Start a project <ArrowUpRight size={17} /></a></header>
     <section className="experience" aria-label="Explore five studio films">
       <div className="intro"><h1>Portfolio<span>.</span></h1><p>CGI &amp; VFX music videos</p></div>
 
       <div className={`world-frame ${ready && !lite ? 'is-ready' : ''}`}>
         <div className="fallback-world" aria-hidden={ready && !lite} inert={ready && !lite} onPointerDown={event => { swipeStart.current = { x: event.clientX, y: event.clientY, moved: false }; }} onPointerUp={event => { const start = swipeStart.current; if (start && Math.abs(event.clientX - start.x) > 35 && Math.abs(event.clientY - start.y) < 70) { start.moved = true; select((selected + (event.clientX < start.x ? 1 : 4)) % 5); } }} onClickCapture={event => { if (swipeStart.current?.moved) { event.preventDefault(); event.stopPropagation(); swipeStart.current = null; } }}>{films.map((item, index) => { const offset = ((index - selected + 7) % 5) - 2; return <button key={item.id} className={`film-portal ${index === selected ? 'is-current' : ''}`} style={{ '--offset': offset } as CSSProperties} onClick={() => index === selected ? enter(index) : select(index)} aria-label={`${index === selected ? 'Play' : 'Select'} ${item.title}`}><Image unoptimized width={720} height={1280} src={item.poster} alt="" fetchPriority={index === 0 ? 'high' : 'auto'} /><span className="portal-mark">{String(index + 1).padStart(2, '0')}</span></button>; })}</div>
-        {mounted && !lite && <World selected={selected} calm={calm} playing={player || panel !== null} reset={reset} onSelect={select} onPlay={() => enter()} onReady={setReady} onInteract={() => setInteracted(true)} />}
       </div>
       <p className={`mobile-hint ${interacted ? 'hint-dismissed' : ''}`}>Swipe to explore</p><div className="film-caption" key={film.id}><p className="film-number">{String(selected + 1).padStart(2, '0')} / 05</p><h2>{film.title}</h2></div>
       <div className="watch-row"><button className="round-control" onClick={() => select((selected + 4) % 5)} aria-label="Previous film"><ArrowLeft /></button><button className="watch-button" onClick={() => enter()}><Play size={17} fill="currentColor" /> Watch film <span>{timecode(film.duration)}</span></button><button className="round-control" onClick={() => select((selected + 1) % 5)} aria-label="Next film"><ArrowRight /></button></div>
